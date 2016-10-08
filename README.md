@@ -1,6 +1,6 @@
 # spider
 关于爬虫的相关项目
-# domainCheck
+# whois
 - 爬取whois的域名是否被注册，并发送邮件提醒
 
 # crawlHotel
