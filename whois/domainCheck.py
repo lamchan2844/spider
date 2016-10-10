@@ -1,37 +1,29 @@
 #-*-encoding:utf-8-*-#
 '''
-version 0.1
+version 0.2
 查询域名是否被注册，并发送邮件通知
 '''
 import requests
 import smtplib  
+import time
 from email.mime.text import MIMEText
 import re
 #换成你的接受邮箱，发送邮箱可以不换
-mailto_list=['xxxxxx@xx.xxx'] 
-mail_host="smtp.xxxx.com"  #设置服务器
-mail_user="xxxx"    #用户名
-mail_pass="xxxx"   #口令 
-mail_postfix="xxxx.com"  #发件箱的后缀
+mailto_list=['907169968@qq.com'] 
+mail_host="smtp.sina.com"  #设置服务器
+mail_user="chenlinmytest"    #用户名
+mail_pass="12345678"   #口令 
+mail_postfix="sina.com"  #发件箱的后缀
 
-def whois(domain):
-	url = 'http://whois.chinaz.com/%s' %domain
+def whois(domain,suffix):
+	url = 'http://www.cndns.com/Ajax/domainQuery.ashx?panel=domain&domainName=%s&domainSuffix=.%s&cookieid=arejdu2jmdjbfdrioptzg4p4&usrname=&domainquerysign=6a1209cee8ece1142bd9d6de0cac93c5'%(domain,suffix)
 	headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586'}
 	#print url
 	res = requests.get(url,headers=headers)
 	res_cont = res.content;
-	#open('2.txt','wb').write(res_cont)
-	s = 'col-red'
-	flag = res_cont.find(s)
-	if flag>=0:
-		return 1,-1,-1,-1
-	else:
-		time_all = re.findall(r'\d{4}\D+\d{2}\D+\d{2}',res_cont)
-		year = time_all[3][0:4]
-		month = time_all[3][7:9]
-		day = time_all[3][12:14]
-		return -1,year,month,day
-	#print res_cont
+	print res_cont
+	val = res_cont[4]
+	return val
 def send_mail(to_list,sub,content):  
     me="test"+"<"+mail_user+"@"+mail_postfix+">"   #这里的hello可以任意设置，收到信后，将按照设置显示
     msg = MIMEText(content,_subtype='html',_charset='gb2312')    #创建一个实例，这里设置为html格式邮件
@@ -48,15 +40,35 @@ def send_mail(to_list,sub,content):
     except Exception, e:  
         print str(e)  
         return False
+def gettime(domain,suffix):
+	url = 'http://www.cndns.com/whois/index.aspx?num=0&d=%s.%s&token=76e9751c3a7f89498ca92fa5d6fd26dc'%(domain,suffix)
+	headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2486.0 Safari/537.36 Edge/13.10586'}
+	res = requests.get(url,headers=headers)
+	cont = res.content
+	open('1.html','wb').write(cont)
+	time_all = re.findall(r'2016',cont)
+	print time_all
 if __name__ == '__main__':
-	domain = 'choushaddsafbi.com'
-	state,year,month,day = whois(domain)
-	if state ==-1:
-		msg = "域名%s已被注册,到期时间：%s年%s月%s日" %(domain,year,month,day)
-	else:
-		msg = "域名%s可被注册 注册地址：https://wanwang.aliyun.com/" %domain
-	if send_mail(mailto_list,"domainCheck",msg):  
-		print "success"
-	else:  
-		print "fail"
+	print 'program is running...'
+	domain = 'memcom'
+	suffix = 'cn'
+	open('code/python/spider/whois/logdomainCheck.txt','wb').write(time.ctime())
+	while(True):
+		now = time.ctime()
+		if (now[11:16]=='08:10'):
+			val = whois(domain,suffix)
+			print val
+			if val == '1':
+				print 'the domain is using'
+				#gettime(domain,suffix)
+				#msg = " 域名%s.%s已被注册" %(domain,suffix)
+			else:
+				msg = "域名%s.%s可被注册 注册地址：https://wanwang.aliyun.com/" %(domain,suffix)
+				if send_mail(mailto_list,"domainCheck",msg):  
+					print "success send mail"
+				else:  
+					print "fail send mail"
+				break
+			time.sleep(61)
+			print 'program is continue...'
 	
