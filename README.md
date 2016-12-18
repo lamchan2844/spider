@@ -5,3 +5,6 @@
 
 # crawlHotel
 - 爬取elong网站的酒店评论文本及酒店的价格
+
+# crawlXidian
+- 爬取西电校园网的信息
